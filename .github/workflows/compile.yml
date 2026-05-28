@@ -2,6 +2,9 @@ name: Compilar Transmisor Pico
 
 on: [push, workflow_dispatch]
 
+env:
+  URL_DEL_SDK: 'https://github.com'
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,7 +19,7 @@ jobs:
 
     - name: Configurar SDK de Pico
       run: |
-        git clone --depth 1 --branch master https://github.com /home/runner/pico-sdk
+        git clone --depth 1 --branch master "${{ env.URL_DEL_SDK }}" /home/runner/pico-sdk
         cd /home/runner/pico-sdk
         git submodule update --init --recursive
 
@@ -31,5 +34,5 @@ jobs:
     - name: Guardar binario .uf2
       uses: actions/upload-artifact@v4
       with:
-        name: ejecutable-transmisor
+        name: executable-transmisor
         path: build/18_transmitter/**/*.uf2
