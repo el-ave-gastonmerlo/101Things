@@ -2,9 +2,6 @@ name: Compilar Transmisor Pico
 
 on: [push, workflow_dispatch]
 
-env:
-  URL_DEL_SDK: 'https://github.com'
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,20 +9,18 @@ jobs:
     - name: Descargar codigo
       uses: actions/checkout@v4
 
-    - name: Instalar herramientas
+    - name: Instalar herramientas de compilacion
       run: |
         sudo apt-get update
         sudo apt-get install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib python3
 
-    - name: Configurar SDK de Pico
-      run: |
-        git clone --depth 1 --branch master "${{ env.URL_DEL_SDK }}" /home/runner/pico-sdk
-        cd /home/runner/pico-sdk
-        git submodule update --init --recursive
+    - name: Cargar SDK de Pico Preinstalado
+      uses: EngineeringDesignResearch/pico-sdk-action@v2
+      with:
+        pico-sdk-version: '1.5.1' # Versión estable oficial
 
     - name: Compilar Transmisor
       run: |
-        export PICO_SDK_PATH=/home/runner/pico-sdk
         mkdir build && cd build
         cmake -DPICO_BOARD=pico ..
         cd 18_transmitter
