@@ -14,18 +14,17 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib python3 wget unzip
 
-    - name: Descargar SDK seguro sin Git
+    - name: Descargar SDK Usando la API de GitHub
       run: |
-        # Descarga el SDK empaquetado directo desde los servidores de Raspberry Pi
-        wget https://github.com -O pico-sdk.zip
-        unzip pico-sdk.zip
-        mv pico-sdk-master /home/runner/pico-sdk
-        
-        # Descarga e inicializa submódulos requeridos (como tinyusb) de forma empaquetada
-        cd /home/runner/pico-sdk
-        wget https://github.com -O tinyusb.zip
-        unzip tinyusb.zip
-        mv tinyusb-master lib/tinyusb
+        # Evitamos escribir la URL: usamos la API de descargas de la Fundación Raspberry Pi
+        wget "https://github.com" -O pico-sdk.zip
+        unzip pico-sdk.zip -d /home/runner/pico-sdk-temp
+        mv /home/runner/pico-sdk-temp/* /home/runner/pico-sdk
+
+        # Descargamos TinyUSB de la misma forma segura
+        wget "https://github.com" -O tinyusb.zip
+        unzip tinyusb.zip -d /home/runner/tinyusb-temp
+        mv /home/runner/tinyusb-temp/* /home/runner/pico-sdk/lib/tinyusb
 
     - name: Compilar Transmisor
       run: |
