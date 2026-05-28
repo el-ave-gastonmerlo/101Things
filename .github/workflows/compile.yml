@@ -17,25 +17,24 @@ jobs:
     - name: Descargar SDK de forma recursiva
       run: |
         export PICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk
-        # Descarga el SDK asegurando todos los componentes internos de USB y Red
-        git clone --depth 1 --branch master https://github.com/raspberrypi/pico-sdk.git $PICO_SDK_PATH
+        git clone --depth 1 --branch master https://github.com $PICO_SDK_PATH
         cd $PICO_SDK_PATH
         git submodule update --init --recursive
 
-    - name: Detectar carpeta y Compilar
+    - name: Compilar Transmisor
       run: |
         export PICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk
         mkdir build && cd build
         
-        # Este comando busca de forma inteligente el archivo CMakeLists.txt original del proyecto
-        TARGET_DIR=$(find $GITHUB_WORKSPACE -name "CMakeLists.txt" -not -path "*/pico-sdk/*" -not -path "*/build/*" | head -n 1 | xargs dirname)
+        # Prepara la configuración global desde la raíz
+        cmake ..
         
-        echo "Configurando proyecto desde: $TARGET_DIR"
-        cmake "$TARGET_DIR"
+        # Entra y compila EN EXCLUSIVA la carpeta del transmisor
+        cd 18_transmitter
         make
         
     - name: Descargar mi archivo .uf2
       uses: actions/upload-artifact@v4
       with:
-        name: pico-binario
-        path: build/**/*.uf2
+        name: pico-transmisor-uf2
+        path: build/18_transmitter/**/*.uf2
