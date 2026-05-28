@@ -1,0 +1,32 @@
+name: Compilar Proyecto Pico
+
+on: [push, workflow_dispatch] # workflow_dispatch permite activarlo manualmente
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Descargar codigo
+      uses: actions/checkout@v4
+
+    - name: Instalar herramientas
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
+
+    - name: Descargar SDK y Compilar
+      run: |
+        export PICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk
+        git clone --depth 1 --branch master https://github.com $PICO_SDK_PATH
+        cd $PICO_SDK_PATH
+        git submodule update --init
+        cd $GITHUB_WORKSPACE
+        mkdir build && cd build
+        cmake ..
+        make
+
+    - name: Descargar mi archivo .uf2
+      uses: actions/upload-artifact@v4
+      with:
+        name: pico-binario
+        path: build/**/*.uf2
