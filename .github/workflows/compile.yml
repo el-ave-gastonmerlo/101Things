@@ -12,15 +12,24 @@ jobs:
     - name: Instalar herramientas de compilacion
       run: |
         sudo apt-get update
-        sudo apt-get install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib python3
+        sudo apt-get install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib python3 wget unzip
 
-    - name: Cargar SDK de Pico Preinstalado
-      uses: EngineeringDesignResearch/pico-sdk-action@v2
-      with:
-        pico-sdk-version: '1.5.1' # Versión estable oficial
+    - name: Descargar SDK seguro sin Git
+      run: |
+        # Descarga el SDK empaquetado directo desde los servidores de Raspberry Pi
+        wget https://github.com -O pico-sdk.zip
+        unzip pico-sdk.zip
+        mv pico-sdk-master /home/runner/pico-sdk
+        
+        # Descarga e inicializa submódulos requeridos (como tinyusb) de forma empaquetada
+        cd /home/runner/pico-sdk
+        wget https://github.com -O tinyusb.zip
+        unzip tinyusb.zip
+        mv tinyusb-master lib/tinyusb
 
     - name: Compilar Transmisor
       run: |
+        export PICO_SDK_PATH=/home/runner/pico-sdk
         mkdir build && cd build
         cmake -DPICO_BOARD=pico ..
         cd 18_transmitter
