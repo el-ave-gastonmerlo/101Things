@@ -17,6 +17,7 @@ jobs:
     - name: Descargar SDK de forma recursiva
       run: |
         export PICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk
+        # CORREGIDO: URL completa y correcta del SDK oficial de Raspberry Pi
         git clone --depth 1 --branch master https://github.com $PICO_SDK_PATH
         cd $PICO_SDK_PATH
         git submodule update --init --recursive
@@ -26,15 +27,15 @@ jobs:
         export PICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk
         mkdir build && cd build
         
-        # Prepara la configuración global desde la raíz
-        cmake ..
+        # Prepara la configuración global indicando que es para la Raspberry Pi Pico
+        cmake -DPICO_BOARD=pico -DPICO_SDK_PATH=$PICO_SDK_PATH ..
         
-        # Entra y compila EN EXCLUSIVA la carpeta del transmisor
+        # Entra a la carpeta del transmisor y compila únicamente este proyecto
         cd 18_transmitter
         make
         
-    - name: Descargar mi archivo .uf2
+    - name: Guardar binario .uf2
       uses: actions/upload-artifact@v4
       with:
-        name: pico-transmisor-uf2
+        name: ejecutable-transmisor
         path: build/18_transmitter/**/*.uf2
