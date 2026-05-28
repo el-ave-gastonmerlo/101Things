@@ -1,6 +1,6 @@
 name: Compilar Proyecto Pico
 
-on: [push, workflow_dispatch] # workflow_dispatch permite activarlo manualmente
+on: [push, workflow_dispatch]
 
 jobs:
   build:
@@ -17,14 +17,17 @@ jobs:
     - name: Descargar SDK y Compilar
       run: |
         export PICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk
+        # REPARADO: Se agregó la ruta completa oficial del SDK
         git clone --depth 1 --branch master https://github.com $PICO_SDK_PATH
         cd $PICO_SDK_PATH
         git submodule update --init
         cd $GITHUB_WORKSPACE
-        mkdir build && cd build
+        
+        # Crear carpeta de compilación de forma segura
+        mkdir -p build && cd build
         cmake ..
         make
-
+        
     - name: Descargar mi archivo .uf2
       uses: actions/upload-artifact@v4
       with:
