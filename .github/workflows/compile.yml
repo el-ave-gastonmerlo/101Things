@@ -12,20 +12,26 @@ jobs:
     - name: Instalar herramientas
       run: |
         sudo apt-get update
-        sudo apt-get install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
+        sudo apt-get install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib python3
 
-    - name: Descargar SDK y Compilar
+    - name: Descargar SDK de forma recursiva
       run: |
         export PICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk
-        # REPARADO: Se agregó la ruta completa oficial del SDK
-        git clone --depth 1 --branch master https://github.com $PICO_SDK_PATH
+        # Descarga el SDK asegurando todos los componentes internos de USB y Red
+        git clone --depth 1 --branch master https://github.com/raspberrypi/pico-sdk.git $PICO_SDK_PATH
         cd $PICO_SDK_PATH
-        git submodule update --init
-        cd $GITHUB_WORKSPACE
+        git submodule update --init --recursive
+
+    - name: Detectar carpeta y Compilar
+      run: |
+        export PICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk
+        mkdir build && cd build
         
-        # Crear carpeta de compilación de forma segura
-        mkdir -p build && cd build
-        cmake ..
+        # Este comando busca de forma inteligente el archivo CMakeLists.txt original del proyecto
+        TARGET_DIR=$(find $GITHUB_WORKSPACE -name "CMakeLists.txt" -not -path "*/pico-sdk/*" -not -path "*/build/*" | head -n 1 | xargs dirname)
+        
+        echo "Configurando proyecto desde: $TARGET_DIR"
+        cmake "$TARGET_DIR"
         make
         
     - name: Descargar mi archivo .uf2
